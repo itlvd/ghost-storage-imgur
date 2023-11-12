@@ -1,24 +1,19 @@
 import Promise from 'bluebird'
 import BaseStorage from 'ghost-storage-base'
-import imgur from 'imgur'
+import { ImgurClient } from 'imgur'
 
 class ImgurStorage extends BaseStorage {
     constructor(config) {
         super()
 
         // Required config
-        const username = process.env.GHOST_IMGUR_USERNAME || config.username
-        const password = process.env.GHOST_IMGUR_PASSWORD || config.password
         const clientId = process.env.GHOST_IMGUR_CLIENT_ID || config.clientId
 
-        imgur.setCredentials(username, password, clientId)
+        imgur = new ImgurClient({ clientId: process.env.CLIENT_ID });
     }
 
     delete(filename, targetDir) {
-        const id = filename.substring(0, filename.indexOf('.'))
-        return imgur.getInfo(id)
-            .then(res => res.data.deletehash)
-            .then(imgur.deleteImage)
+        return Promise.reject('not implemented');
     }
 
     exists(filename, targetDir) {
@@ -30,7 +25,10 @@ class ImgurStorage extends BaseStorage {
     }
 
     save(file, targetDir) {
-        return imgur.uploadFile(file.path)
+        return imgur.upload({
+                  image: createReadStream(image.path),
+                  type: 'stream',
+            })
             .then(res => res.data.link)
     }
 
